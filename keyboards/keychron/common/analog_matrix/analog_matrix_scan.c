@@ -22,6 +22,8 @@
 #include "debounce.h"
 #include "lpm.h"
 
+#include <keychron_common.h>
+
 #ifndef HC164_DS
 #    define HC164_DS B3
 #endif
@@ -160,6 +162,21 @@ void matrix_read_rows_on_col(uint8_t current_col, matrix_row_t row_shifter) {
             if (pressed) {
                 if ((analog_raw_matrix[row_index] & row_mask) == 0)
                     changed = true;
+
+                if (is_mouse_key(current_col, row_index)) {
+                    uint8_t travel = analog_matrix_get_travel(row_index, current_col)/TRAVEL_SCALE;
+                    uint8_t mouse_speed = ((travel * travel + travel) * 4) / 100;
+                    if (mouse_speed == 0)
+                        mouse_speed = 1;
+                    if (mouse_speed > 200)
+                        mouse_speed = 200;
+                    if (is_vertical_mouse_key(current_col, row_index)) {
+                        mousekey_set_speed_y(mouse_speed);
+                    } else {
+                        mousekey_set_speed_x(mouse_speed);
+                    }
+                }
+
 
                 if (debouce_times == ANALOG_DEBOUCE_TIME) {
                     row_value |= (0x01 << row_index);

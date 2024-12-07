@@ -48,6 +48,39 @@ static key_combination_t key_comb_list[4] = {
     {2, {KC_LWIN, KC_C}},
 };
 
+// A struct that stores col and row
+typedef struct {
+    uint8_t col;
+    uint8_t row;
+} key_pos_t;
+
+// An array for the 4 keys, all set to 255, 255 by default using key_post_t
+key_pos_t mouse_keys_pos[4] = {
+    {255, 255},
+    {255, 255},
+    {255, 255},
+    {255, 255},
+};
+
+void set_mouse_key_last_key_pos(uint8_t pos, uint8_t col, uint8_t row) {
+    if (pos>3) return;
+    mouse_keys_pos[pos].col = col;
+    mouse_keys_pos[pos].row = row;
+}
+
+inline bool is_mouse_key(uint8_t col, uint8_t row) {
+   for (uint8_t i = 0; i < 4; i++) {
+        if (mouse_keys_pos[i].col == col && mouse_keys_pos[i].row == row) {
+            return true;
+        }
+    }
+    return false;
+}
+
+inline bool is_vertical_mouse_key(uint8_t col, uint8_t row) {
+    return (mouse_keys_pos[0].col == col && mouse_keys_pos[0].row == row) || (mouse_keys_pos[1].col == col && mouse_keys_pos[1].row == row);
+}
+
 bool process_record_keychron_common(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case KC_MCTRL:
@@ -100,7 +133,18 @@ bool process_record_keychron_common(uint16_t keycode, keyrecord_t *record) {
                 }
             }
             return false; // Skip all further processing of this key
-
+        case KC_MS_UP:
+            set_mouse_key_last_key_pos(0, record->event.key.col, record->event.key.row);
+            break;
+        case KC_MS_DOWN:
+            set_mouse_key_last_key_pos(1, record->event.key.col, record->event.key.row);
+            break;
+        case KC_MS_LEFT:
+            set_mouse_key_last_key_pos(2, record->event.key.col, record->event.key.row);
+            break;
+        case KC_MS_RIGHT:
+            set_mouse_key_last_key_pos(3, record->event.key.col, record->event.key.row);
+            break;
         default:
 #ifdef ANANLOG_MATRIX
             return process_record_profile( keycode, record);

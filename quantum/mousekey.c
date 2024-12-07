@@ -42,6 +42,9 @@ static void           mousekey_debug(void);
 static uint8_t        mousekey_accel        = 0;
 static uint8_t        mousekey_repeat       = 0;
 static uint8_t        mousekey_wheel_repeat = 0;
+static uint8_t        mousekey_variable     = MOUSEKEY_VARIABLE;
+static uint8_t        mousekey_speed_x      = 1;
+static uint8_t        mousekey_speed_y      = 1;
 #ifdef MOUSEKEY_INERTIA
 static uint8_t mousekey_frame     = 0; // track whether gesture is inactive, first frame, or repeating
 static int8_t  mousekey_x_dir     = 0; // -1 / 0 / 1 = left / neutral / right
@@ -108,6 +111,34 @@ static uint8_t move_unit(void) {
         unit = (MOUSEKEY_MOVE_DELTA * mk_max_speed * mousekey_repeat) / mk_time_to_max;
     }
     return (unit > MOUSEKEY_MOVE_MAX ? MOUSEKEY_MOVE_MAX : (unit == 0 ? 1 : unit));
+}
+
+void mousekey_set_speed_x(uint8_t speed) {
+   mousekey_speed_x = speed;
+}
+
+void mousekey_set_speed_y(uint8_t speed) {
+   mousekey_speed_y = speed;
+}
+
+static uint8_t move_unit_x(void) {
+    uint16_t unit;
+    if (mousekey_variable) {
+        unit = mousekey_speed_x;
+    } else {
+        unit = move_unit();
+    }
+    return unit;
+}
+
+static uint8_t move_unit_y(void) {
+    uint16_t unit;
+    if (mousekey_variable) {
+        unit = mousekey_speed_y;
+    } else {
+        unit = move_unit();
+    }
+    return unit;
 }
 
 #            else // MOUSEKEY_INERTIA mode
@@ -341,8 +372,8 @@ void mousekey_task(void) {
 
     if ((tmpmr.x || tmpmr.y) && timer_elapsed(last_timer_c) > (mousekey_repeat ? mk_interval : mk_delay * 10)) {
         if (mousekey_repeat != UINT8_MAX) mousekey_repeat++;
-        if (tmpmr.x != 0) mouse_report.x = move_unit() * ((tmpmr.x > 0) ? 1 : -1);
-        if (tmpmr.y != 0) mouse_report.y = move_unit() * ((tmpmr.y > 0) ? 1 : -1);
+        if (tmpmr.x != 0) mouse_report.x = move_unit_x() * ((tmpmr.x > 0) ? 1 : -1);
+        if (tmpmr.y != 0) mouse_report.y = move_unit_y() * ((tmpmr.y > 0) ? 1 : -1);
 
         /* diagonal move [1/sqrt(2)] */
         if (mouse_report.x && mouse_report.y) {
@@ -418,13 +449,13 @@ void mousekey_on(uint8_t code) {
 #    else // no inertia
 
     if (code == KC_MS_UP)
-        mouse_report.y = move_unit() * -1;
+        mouse_report.y = move_unit_y() * -1;
     else if (code == KC_MS_DOWN)
-        mouse_report.y = move_unit();
+        mouse_report.y = move_unit_y();
     else if (code == KC_MS_LEFT)
-        mouse_report.x = move_unit() * -1;
+        mouse_report.x = move_unit_x() * -1;
     else if (code == KC_MS_RIGHT)
-        mouse_report.x = move_unit();
+        mouse_report.x = move_unit_x();
 
 #    endif // inertia or not
 
