@@ -24,6 +24,8 @@
 #    include "lpm.h"
 #endif
 
+#include <keychron_common.h>
+
 #ifndef HC164_DS
 #    define HC164_DS B3
 #endif
@@ -197,6 +199,36 @@ void matrix_read_rows_on_col(uint8_t current_col, matrix_row_t row_shifter) {
             bool pressed = analog_matrix_get_key_state(row_index, current_col);
             if (pressed) {
                 if ((analog_raw_matrix[row_index] & row_mask) == 0) changed = true;
+
+#ifdef MOUSEKEY_ENABLE
+                uint16_t mouse_keycode = is_mouse_key(current_col, row_index);
+                if (mouse_keycode>0) {
+                    uint8_t travel = analog_matrix_get_travel(row_index, current_col)/TRAVEL_SCALE;
+                    uint8_t mouse_speed = ((travel * travel + travel) * 4) / 100;
+                    if (mouse_speed == 0)
+                        mouse_speed = 1;
+                    if (mouse_speed > 200)
+                        mouse_speed = 200;
+                    switch (mouse_keycode) {
+                        case QK_MOUSE_CURSOR_UP:
+                        case QK_MOUSE_CURSOR_DOWN:
+                            mousekey_set_speed_y(mouse_speed);
+                            break;
+                        case QK_MOUSE_CURSOR_LEFT:
+                        case QK_MOUSE_CURSOR_RIGHT:
+                            mousekey_set_speed_x(mouse_speed);
+                            break;
+                        case QK_MOUSE_WHEEL_UP:
+                        case QK_MOUSE_WHEEL_DOWN:
+                            mousekey_set_speed_v(mouse_speed);
+                            break;
+                        case QK_MOUSE_WHEEL_LEFT:
+                        case QK_MOUSE_WHEEL_RIGHT:
+                            mousekey_set_speed_h(mouse_speed);
+                            break;
+                    }
+                }
+#endif // MOUSEKEY_ENABLE
 
                 if (debouce_times == ANALOG_DEBOUCE_TIME) {
                     row_value |= (0x01 << row_index);
