@@ -16,6 +16,9 @@
 
 #pragma once
 
+/* Hall effect keys drive mouse speed proportionally to travel */
+#define MOUSEKEY_VARIABLE 1
+
 #ifdef RGB_MATRIX_ENABLE
 /* LED Current Configuration */
 #    define SNLED27351_CURRENT_TUNE \
