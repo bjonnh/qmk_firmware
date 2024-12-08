@@ -196,6 +196,8 @@ void           mousekey_clear(void);
 void           mousekey_send(void);
 void           mousekey_set_speed_x(uint8_t);
 void           mousekey_set_speed_y(uint8_t);
+void           mousekey_set_speed_h(uint8_t);
+void           mousekey_set_speed_v(uint8_t);
 report_mouse_t mousekey_get_report(void);
 bool           should_mousekey_report_send(report_mouse_t *mouse_report);
 

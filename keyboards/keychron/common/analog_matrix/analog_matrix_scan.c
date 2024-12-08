@@ -163,20 +163,33 @@ void matrix_read_rows_on_col(uint8_t current_col, matrix_row_t row_shifter) {
                 if ((analog_raw_matrix[row_index] & row_mask) == 0)
                     changed = true;
 
-                if (is_mouse_key(current_col, row_index)) {
+                uint16_t mouse_keycode = is_mouse_key(current_col, row_index);
+                if (mouse_keycode>0) {
                     uint8_t travel = analog_matrix_get_travel(row_index, current_col)/TRAVEL_SCALE;
                     uint8_t mouse_speed = ((travel * travel + travel) * 4) / 100;
                     if (mouse_speed == 0)
                         mouse_speed = 1;
                     if (mouse_speed > 200)
                         mouse_speed = 200;
-                    if (is_vertical_mouse_key(current_col, row_index)) {
-                        mousekey_set_speed_y(mouse_speed);
-                    } else {
-                        mousekey_set_speed_x(mouse_speed);
+                    switch (mouse_keycode) {
+                        case KC_MS_UP:
+                        case KC_MS_DOWN:
+                            mousekey_set_speed_y(mouse_speed);
+                            break;
+                        case KC_MS_LEFT:
+                        case KC_MS_RIGHT:
+                            mousekey_set_speed_x(mouse_speed);
+                            break;
+                        case KC_MS_WH_UP:
+                        case KC_MS_WH_DOWN:
+                            mousekey_set_speed_v(mouse_speed);
+                            break;
+                        case KC_MS_WH_LEFT:
+                        case KC_MS_WH_RIGHT:
+                            mousekey_set_speed_h(mouse_speed);
+                            break;
                     }
                 }
-
 
                 if (debouce_times == ANALOG_DEBOUCE_TIME) {
                     row_value |= (0x01 << row_index);

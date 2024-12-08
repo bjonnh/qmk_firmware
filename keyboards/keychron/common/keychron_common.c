@@ -52,33 +52,33 @@ static key_combination_t key_comb_list[4] = {
 typedef struct {
     uint8_t col;
     uint8_t row;
+    uint16_t keycode;
 } key_pos_t;
 
-// An array for the 4 keys, all set to 255, 255 by default using key_post_t
-key_pos_t mouse_keys_pos[4] = {
-    {255, 255},
-    {255, 255},
-    {255, 255},
-    {255, 255},
+key_pos_t mouse_keys_pos[8] = {
+    {255, 255, KC_MS_UP},
+    {255, 255, KC_MS_DOWN},
+    {255, 255, KC_MS_LEFT},
+    {255, 255, KC_MS_RIGHT},
+    {255, 255, KC_MS_WH_UP},
+    {255, 255, KC_MS_WH_DOWN},
+    {255, 255, KC_MS_WH_LEFT},
+    {255, 255, KC_MS_WH_RIGHT},
 };
 
 void set_mouse_key_last_key_pos(uint8_t pos, uint8_t col, uint8_t row) {
-    if (pos>3) return;
+    if (pos>7) return;
     mouse_keys_pos[pos].col = col;
     mouse_keys_pos[pos].row = row;
 }
 
-inline bool is_mouse_key(uint8_t col, uint8_t row) {
-   for (uint8_t i = 0; i < 4; i++) {
+uint16_t is_mouse_key(uint8_t col, uint8_t row) {
+   for (uint8_t i = 0; i < 8; i++) {
         if (mouse_keys_pos[i].col == col && mouse_keys_pos[i].row == row) {
-            return true;
+            return mouse_keys_pos[i].keycode;
         }
     }
-    return false;
-}
-
-inline bool is_vertical_mouse_key(uint8_t col, uint8_t row) {
-    return (mouse_keys_pos[0].col == col && mouse_keys_pos[0].row == row) || (mouse_keys_pos[1].col == col && mouse_keys_pos[1].row == row);
+    return 0;
 }
 
 bool process_record_keychron_common(uint16_t keycode, keyrecord_t *record) {
@@ -144,6 +144,18 @@ bool process_record_keychron_common(uint16_t keycode, keyrecord_t *record) {
             break;
         case KC_MS_RIGHT:
             set_mouse_key_last_key_pos(3, record->event.key.col, record->event.key.row);
+            break;
+        case KC_MS_WH_UP:
+            set_mouse_key_last_key_pos(4, record->event.key.col, record->event.key.row);
+            break;
+        case KC_MS_WH_DOWN:
+            set_mouse_key_last_key_pos(5, record->event.key.col, record->event.key.row);
+            break;
+        case KC_MS_WH_LEFT:
+            set_mouse_key_last_key_pos(6, record->event.key.col, record->event.key.row);
+            break;
+        case KC_MS_WH_RIGHT:
+            set_mouse_key_last_key_pos(7, record->event.key.col, record->event.key.row);
             break;
         default:
 #ifdef ANANLOG_MATRIX
