@@ -78,6 +78,18 @@ static uint8_t mac_keycode[4] = {
     KC_RCMD,
 };
 
+#ifdef MIDI_ENABLE
+static bool midi_mode = false;
+static bool midi_fn_pressed = false;
+void set_midi_mode(bool value) {
+    midi_mode = value;
+}
+
+bool get_midi_mode(void) {
+    return midi_mode;
+}
+#endif // MIDI_ENABLE
+
 // clang-format off
 static key_combination_t key_comb_list[] = {
     {2, {KC_LWIN, KC_TAB}},
@@ -190,6 +202,18 @@ uint16_t is_mouse_key(uint8_t col, uint8_t row) {
 }
 
 bool process_record_keychron_common(uint16_t keycode, keyrecord_t *record) {
+#ifdef MIDI_ENABLE
+    if (midi_mode) {
+        switch (keycode) {
+            case MO(0)... MO(15):
+                midi_fn_pressed = record->event.pressed;
+                break;
+            default:
+                if (!midi_fn_pressed && record->event.pressed) // we always process releases to avoid keys stuck
+                    return false; // We are in midi mode and not with FN pressed
+        }
+    } // No further processing if not in midi mode
+#endif
     switch (keycode) {
 #ifdef KC_MCTRL
         case KC_MCTRL:

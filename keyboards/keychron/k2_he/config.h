@@ -95,3 +95,5 @@
 #define FN_KEY_1 MO(1)
 #define FN_KEY_2 MO(3)
 #define FN_BL_TRIG_KEY KC_END
+
+#define MIDI_ADVANCED
