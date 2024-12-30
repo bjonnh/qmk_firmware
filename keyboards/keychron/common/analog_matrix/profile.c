@@ -119,6 +119,10 @@ uint8_t profile_get_current_index(void) {
 bool profile_select(uint8_t prof_idx, bool indication) {
     if (prof_idx >= PROFILE_COUNT) return false;
 
+#ifdef MIDI_ENABLE
+    set_midi_mode(prof_idx==2);
+#endif // MIDI_ENABLE
+
     if (prof_idx != current_profile_index) {
         current_profile_index = prof_idx;
 
