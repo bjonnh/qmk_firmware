@@ -17,6 +17,7 @@
 #pragma once
 
 #include "stdint.h"
+#include "config.h"
 
 // clang-format off
 enum {
@@ -91,6 +92,10 @@ void set_mouse_vertical_last_key_pos(uint8_t col, uint8_t row);
 void set_mouse_horizontal_last_key_pos(uint8_t col, uint8_t row);
 void set_mouse_key_last_key_pos(uint8_t pos, uint8_t col, uint8_t row);
 uint16_t is_mouse_key(uint8_t col, uint8_t row);
+#ifdef MIDI_ENABLE
+void set_midi_mode(bool value);
+bool get_midi_mode(void);
+#endif // MIDI_ENABLE
 
 #ifdef ENCODER_ENABLE
 void encoder_cb_init(void);

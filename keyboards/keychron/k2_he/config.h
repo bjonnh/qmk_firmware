@@ -96,3 +96,5 @@
 #define FN_BL_TRIG_KEY KC_END
 
 #define MATRIX_IO_DELAY 10
+
+#define MIDI_ADVANCED

@@ -137,6 +137,9 @@ static void unselect_col(uint8_t col) {
 void select_all_cols(void) { }
 static void unselect_cols(void) { }
 
+#ifdef MIDI_ENABLE
+extern MidiDevice midi_device;
+#endif // MIDI_ENABLE
 void matrix_read_rows_on_col(uint8_t current_col, matrix_row_t row_shifter) {
 
     // Select col
@@ -163,6 +166,12 @@ void matrix_read_rows_on_col(uint8_t current_col, matrix_row_t row_shifter) {
                 if ((analog_raw_matrix[row_index] & row_mask) == 0)
                     changed = true;
 
+#ifdef MIDI_ENABLE
+                if (get_midi_mode())
+                    midi_send_cc(&midi_device, midi_config.channel, row_index*MATRIX_ROWS+current_col, analog_matrix_get_travel(row_index, current_col)/2);
+#endif // MIDI_ENABLE
+
+                #ifdef MOUSEKEY_ENABLE
                 uint16_t mouse_keycode = is_mouse_key(current_col, row_index);
                 if (mouse_keycode>0) {
                     uint8_t travel = analog_matrix_get_travel(row_index, current_col)/TRAVEL_SCALE;
@@ -190,6 +199,7 @@ void matrix_read_rows_on_col(uint8_t current_col, matrix_row_t row_shifter) {
                             break;
                     }
                 }
+                #endif // MOUSEKEY_ENABLE
 
                 if (debouce_times == ANALOG_DEBOUCE_TIME) {
                     row_value |= (0x01 << row_index);
@@ -197,6 +207,10 @@ void matrix_read_rows_on_col(uint8_t current_col, matrix_row_t row_shifter) {
                     row_value_recheck |= (0x01 << row_index);
                 }
             } else if (analog_raw_matrix[row_index] & row_mask) {
+#ifdef MIDI_ENABLE
+                if (get_midi_mode())
+                    midi_send_cc(&midi_device, midi_config.channel,  row_index*MATRIX_ROWS+current_col, 0);
+#endif // MIDI_ENABLE
                 changed = true;
             }
         }
