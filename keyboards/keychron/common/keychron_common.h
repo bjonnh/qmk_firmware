@@ -17,6 +17,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <assert.h>
 #include "keycodes.h"
 
@@ -141,6 +142,10 @@ bool process_record_keychron_common(uint16_t keycode, keyrecord_t *record);
 void keychron_common_task(void);
 void set_mouse_key_last_key_pos(uint8_t pos, uint8_t col, uint8_t row);
 uint16_t is_mouse_key(uint8_t col, uint8_t row);
+#ifdef MIDI_ENABLE
+void set_midi_mode(bool value);
+bool get_midi_mode(void);
+#endif // MIDI_ENABLE
 
 #ifdef ENCODER_ENABLE
 void encoder_cb_init(void);
