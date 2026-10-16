@@ -7,11 +7,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include QMK_KEYBOARD_H
@@ -59,9 +59,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-    [MAC_BASE] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
-    [MAC_FN]   = {ENCODER_CCW_CW(RM_VALD, RM_VALU) },
-    [WIN_BASE] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
-    [WIN_FN]   = {ENCODER_CCW_CW(RM_VALD, RM_VALU) }
+    [MAC_BASE] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+    [MAC_FN]   = { ENCODER_CCW_CW(RM_VALD, RM_VALU) },
+    [WIN_BASE] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+    [WIN_FN]   = { ENCODER_CCW_CW(RM_VALD, RM_VALU) }
 };
 #endif

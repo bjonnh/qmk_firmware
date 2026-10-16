@@ -51,6 +51,11 @@ extern keymap_config_t keymap_config;
 #    define usb_lld_disconnect_bus(usbp)
 #endif
 
+#ifdef USB_REPORT_INTERVAL_ENABLE
+extern void usb_endpoint_in_tx(USBDriver *usbp, usbep_t ep);
+uint8_t usb_report_interval = 0;
+#endif
+
 extern usb_endpoint_in_t  usb_endpoints_in[USB_ENDPOINT_IN_COUNT];
 extern usb_endpoint_out_t usb_endpoints_out[USB_ENDPOINT_OUT_COUNT];
 
@@ -80,7 +85,13 @@ static const USBDescriptor *usb_get_descriptor_cb(USBDriver *usbp, uint8_t dtype
 
     static USBDescriptor descriptor;
     descriptor.ud_string = NULL;
-    descriptor.ud_size   = get_usb_descriptor(setup->wValue.word, setup->wIndex, setup->wLength, (const void **const)&descriptor.ud_string);
+    //descriptor.ud_size   = get_usb_descriptor(setup->wValue.word, setup->wIndex, setup->wLength, (const void **const)&descriptor.ud_string);
+#ifdef XINPUT_ENABLE
+    if ((usbp->setup[0] & (USB_RTYPE_DIR_MASK | USB_RTYPE_TYPE_MASK)) == (USB_RTYPE_DIR_DEV2HOST | USB_RTYPE_TYPE_VENDOR))
+        descriptor.ud_size = get_usb_vendor_descriptor(setup->bmRequestType & USB_RTYPE_RECIPIENT_MASK, setup->bRequest, setup->wValue.word, setup->wIndex, setup->wLength, (const void **const)&descriptor.ud_string);
+    else
+#endif
+        descriptor.ud_size = get_usb_descriptor(setup->wValue.word, setup->wIndex, setup->wLength, (const void **const)&descriptor.ud_string);
 
     if (descriptor.ud_string == NULL) {
         return NULL;
@@ -192,6 +203,9 @@ static void usb_event_cb(USBDriver *usbp, usbevent_t event) {
         case USB_EVENT_RESET:
             usb_event_queue_enqueue(event);
             chSysLockFromISR();
+            if (event == USB_EVENT_RESET) {
+                usb_device_state_set_protocol(USB_PROTOCOL_REPORT);
+            }
             for (int i = 0; i < USB_ENDPOINT_IN_COUNT; i++) {
                 usb_endpoint_in_suspend_cb(&usb_endpoints_in[i]);
             }
@@ -306,6 +320,18 @@ static bool usb_requests_hook_cb(USBDriver *usbp) {
         return true;
     }
 
+#ifdef XINPUT_ENABLE
+    /* Handle the GET_MS_DESCRIPTOR control request */
+    if ((setup->bmRequestType == USB_RTYPE_TYPE_OS_FEATURE) && (setup->bRequest == USB_REQ_GET_MS_DESCRIPTOR)) {
+        const USBDescriptor *descriptor = usbp->config->get_descriptor_cb(usbp, setup->wValue.lbyte, setup->wValue.hbyte, setup->wIndex);
+        if ((descriptor == NULL) || (descriptor->ud_string == NULL) || (descriptor->ud_size == 0)) {
+            return false;
+        }
+        usbSetupTransfer(usbp, (uint8_t *)descriptor->ud_string, descriptor->ud_size, NULL);
+        return true;
+    }
+#endif
+
     for (int i = 0; i < USB_ENDPOINT_IN_COUNT; i++) {
         if (usb_endpoints_in[i].usb_requests_cb != NULL) {
             if (usb_endpoints_in[i].usb_requests_cb(usbp)) {
@@ -317,11 +343,51 @@ static bool usb_requests_hook_cb(USBDriver *usbp) {
     return false;
 }
 
+static __attribute__((unused)) void usb_sof_cb(USBDriver *usbp) {
+#if defined(USB_REPORT_INTERVAL_ENABLE)
+    wait_us(20);
+    if (usbp->epc[KEYBOARD_IN_EPNUM]) {
+        USBInEndpointState *isp = usbp->epc[KEYBOARD_IN_EPNUM]->in_state;
+
+        if (isp->report_interval_count < usbp->report_interval[KEYBOARD_IN_EPNUM]) ++isp->report_interval_count;
+
+        if (!usbGetTransmitStatusI(usbp, KEYBOARD_IN_EPNUM)) {
+            usb_endpoint_in_tx(usbp, KEYBOARD_IN_EPNUM);
+        }
+    }
+
+    if (usbp->epc[SHARED_IN_EPNUM]) {
+        USBInEndpointState *isp = usbp->epc[SHARED_IN_EPNUM]->in_state;
+
+        if (isp->report_interval_count < usbp->report_interval[SHARED_IN_EPNUM]) ++isp->report_interval_count;
+
+        if (!usbGetTransmitStatusI(usbp, SHARED_IN_EPNUM)) {
+            usb_endpoint_in_tx(usbp, SHARED_IN_EPNUM);
+        }
+    }
+#endif
+    (void)usbp;
+}
+
 static const USBConfig usbcfg = {
     usb_event_cb,          /* USB events callback */
     usb_get_descriptor_cb, /* Device GET_DESCRIPTOR request callback */
     usb_requests_hook_cb,  /* Requests hook callback */
+    usb_sof_cb,            /* SOF callback */
 };
+
+#if defined(USB_REPORT_INTERVAL_ENABLE)
+void update_usb_report_interval(USBDriver *usbp, uint8_t interval) {
+    for (int i = 0; i < USB_ENDPOINT_IN_COUNT; i++) {
+        usbp->report_interval[i] = 0;
+    }
+
+    usbp->report_interval[USB_ENDPOINT_IN_SHARED] = interval;
+#if !defined(KEYBOARD_SHARED_EP)
+    usbp->report_interval[USB_ENDPOINT_IN_KEYBOARD] = interval;
+#endif
+}
+#endif
 
 void init_usb_driver(USBDriver *usbp) {
     for (int i = 0; i < USB_ENDPOINT_IN_COUNT; i++) {
@@ -333,6 +399,9 @@ void init_usb_driver(USBDriver *usbp) {
         usb_endpoint_out_init(&usb_endpoints_out[i]);
         usb_endpoint_out_start(&usb_endpoints_out[i]);
     }
+#if defined(USB_REPORT_INTERVAL_ENABLE)
+    update_usb_report_interval(usbp, usb_report_interval);
+#endif
 
     /*
      * Activates the USB driver and then the USB bus pull-up on D+.
@@ -369,6 +438,9 @@ __attribute__((weak)) void restart_usb_driver(USBDriver *usbp) {
         usb_endpoint_out_init(&usb_endpoints_out[i]);
         usb_endpoint_out_start(&usb_endpoints_out[i]);
     }
+#if defined(USB_REPORT_INTERVAL_ENABLE)
+    update_usb_report_interval(usbp, usb_report_interval);
+#endif
 
     usbStart(usbp, &usbcfg);
     usbConnectBus(usbp);
@@ -489,6 +561,12 @@ void send_digitizer(report_digitizer_t *report) {
 #endif
 }
 
+void send_xinput(report_xinput_t *report) {
+#ifdef XINPUT_ENABLE
+    send_report(USB_ENDPOINT_IN_XINPUT, report, sizeof(report_xinput_t));
+#endif
+}
+
 void send_plover_hid(report_plover_hid_t *report) {
 #ifdef PLOVER_HID_ENABLE
     send_report(USB_ENDPOINT_IN_PLOVER_HID, report, sizeof(report_plover_hid_t));
@@ -523,7 +601,7 @@ void send_raw_hid(uint8_t *data, uint8_t length) {
 void raw_hid_task(void) {
     uint8_t buffer[RAW_EPSIZE];
     while (receive_report(USB_ENDPOINT_OUT_RAW, buffer, sizeof(buffer))) {
-        raw_hid_receive(buffer, sizeof(buffer));
+        raw_hid_receive(RAW_HID_SRC_USB, buffer, sizeof(buffer));
     }
 }
 

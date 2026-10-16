@@ -7,15 +7,16 @@ static void jellybean_raindrops_set_color(uint8_t i, effect_params_t* params) {
 
     hsv_t hsv = {random8(), random8_min_max(127, 255), rgb_matrix_config.hsv.v};
     rgb_t rgb = rgb_matrix_hsv_to_rgb(hsv);
-    rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
+    rgb_matrix_region_set_color(params->region, i, rgb.r, rgb.g, rgb.b);
 }
 
 bool JELLYBEAN_RAINDROPS(effect_params_t* params) {
-    static uint16_t index = RGB_MATRIX_LED_COUNT + 1;
+    static uint16_t index[2] = { RGB_MATRIX_LED_COUNT + 1,  RGB_MATRIX_LED_COUNT + 1 };      // TODO: more region?
+    uint8_t region = params->region;
 
     // Periodic trigger for LED change
     if ((params->iter == 0) && (scale16by8(g_rgb_timer, qadd8(rgb_matrix_config.speed, 16)) % 5 == 0)) {
-        index = random8_max(RGB_MATRIX_LED_COUNT);
+        index[region] = random8_max(RGB_MATRIX_LED_COUNT);
     }
 
     RGB_MATRIX_USE_LIMITS(led_min, led_max);
@@ -25,9 +26,9 @@ bool JELLYBEAN_RAINDROPS(effect_params_t* params) {
         }
     }
     // Change LED once and set index out of range till next trigger
-    else if (led_min <= index && index < led_max) {
-        jellybean_raindrops_set_color(index, params);
-        index = RGB_MATRIX_LED_COUNT + 1;
+    else if (led_min <= index[region] && index[region] < led_max) {
+        jellybean_raindrops_set_color(index[region], params);
+        index[region] = RGB_MATRIX_LED_COUNT + 1;
     }
     return rgb_matrix_check_finished_leds(led_max);
 }

@@ -10,7 +10,7 @@ static void set_starlight_dual_sat_color(uint8_t i, effect_params_t* params) {
     hsv.v         = scale8(abs8(sin8(time) - 128) * 2, hsv.v);
     hsv.s         = hsv.s + random8_max(31);
     rgb_t rgb     = rgb_matrix_hsv_to_rgb(hsv);
-    rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
+    rgb_matrix_region_set_color(params->region, i, rgb.r, rgb.g, rgb.b);
 }
 
 bool STARLIGHT_DUAL_SAT(effect_params_t* params) {

@@ -64,6 +64,8 @@ void send_nkro(report_nkro_t *report);
 void send_mouse(report_mouse_t *report);
 void send_extra(report_extra_t *report);
 void send_raw_hid(uint8_t *data, uint8_t length);
+void send_joystick(report_joystick_t *report);
+void send_xinput(report_xinput_t *report);
 
 /* host struct */
 host_driver_t chibios_driver = {
@@ -72,6 +74,12 @@ host_driver_t chibios_driver = {
     .send_nkro     = send_nkro,
     .send_mouse    = send_mouse,
     .send_extra    = send_extra,
+#ifdef JOYSTICK_ENABLE
+    .send_joystick = send_joystick,
+#endif
+#ifdef XINPUT_ENABLE
+    .send_xinput = send_xinput,
+#endif
 #ifdef RAW_ENABLE
     .send_raw_hid = send_raw_hid,
 #endif
@@ -194,6 +202,18 @@ void protocol_pre_task(void) {
                 // ...and then update the wakeup matrix again as the waking key
                 // might have been released during the delay
                 update_matrix_state_after_wakeup();
+#    endif
+                wait_ms(300);
+#    ifdef MOUSEKEY_ENABLE
+                // Wiggle to wakeup
+                mousekey_on(MS_LEFT);
+                mousekey_send();
+                wait_ms(10);
+                mousekey_on(MS_RGHT);
+                mousekey_send();
+                wait_ms(10);
+                mousekey_off((MS_RGHT));
+                mousekey_send();
 #    endif
             }
         }

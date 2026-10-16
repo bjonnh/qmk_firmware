@@ -99,6 +99,8 @@
                 "GD32VF103",
                 "WB32F3G71",
                 "WB32FQ95",
+                "AT32F402",
+                "AT32F405",
                 "AT32F415",
                 "atmega16u2",
                 "atmega32u2",
@@ -575,7 +577,8 @@
                         "is31fl3743a",
                         "is31fl3745",
                         "is31fl3746a",
-                        "snled27351"
+                        "snled27351",
+                        "snled27351_spi"
                     ]
                 },
                 "center_point": {
@@ -666,6 +669,8 @@
                         "is31fl3745",
                         "is31fl3746a",
                         "snled27351",
+                        "snled27351_spi",
+                        "sn3734_spi",
                         "ws2812"
                     ]
                 },

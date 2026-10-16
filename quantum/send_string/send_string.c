@@ -23,6 +23,9 @@
 #include "keycode.h"
 #include "action.h"
 #include "wait.h"
+#if defined(LK_WIRELESS_ENABLE) || defined(KC_BLUETOOTH_ENABLE)
+#    include "wireless.h"
+#endif
 
 #if defined(AUDIO_ENABLE) && defined(SENDSTRING_BELL)
 #    include "audio.h"
@@ -165,10 +168,16 @@ void send_string_with_delay_impl(char (*getter)(void *), void *arg, uint8_t inte
                 // down
                 uint8_t keycode = getter(arg);
                 register_code(keycode);
+#if defined(LK_WIRELESS_ENABLE) || defined(KC_BLUETOOTH_ENABLE)
+                send_string_task();
+#endif
             } else if (ascii_code == SS_UP_CODE) {
                 // up
                 uint8_t keycode = getter(arg);
                 unregister_code(keycode);
+#if defined(LK_WIRELESS_ENABLE) || defined(KC_BLUETOOTH_ENABLE)
+                send_string_task();
+#endif
             } else if (ascii_code == SS_DELAY_CODE) {
                 // delay
                 int ms     = 0;
@@ -182,6 +191,9 @@ void send_string_with_delay_impl(char (*getter)(void *), void *arg, uint8_t inte
 
                 wait_ms(ms);
             }
+#if defined(LK_WIRELESS_ENABLE) || defined(KC_BLUETOOTH_ENABLE)
+            send_string_task();
+#endif
 
             wait_ms(interval);
 
@@ -228,11 +240,17 @@ void send_char_with_delay(char ascii_code, uint8_t interval) {
 
     if (is_shifted) {
         register_code(KC_LEFT_SHIFT);
+#if defined(LK_WIRELESS_ENABLE) || defined(KC_BLUETOOTH_ENABLE)
+        if (interval) send_string_task();
+#endif
         wait_ms(interval);
     }
 
     if (is_altgred) {
         register_code(KC_RIGHT_ALT);
+#if defined(LK_WIRELESS_ENABLE) || defined(KC_BLUETOOTH_ENABLE)
+        if (interval) send_string_task();
+#endif
         wait_ms(interval);
     }
 
@@ -241,16 +259,25 @@ void send_char_with_delay(char ascii_code, uint8_t interval) {
 
     if (is_altgred) {
         unregister_code(KC_RIGHT_ALT);
+#if defined(LK_WIRELESS_ENABLE) || defined(KC_BLUETOOTH_ENABLE)
+        if (interval) send_string_task();
+#endif
         wait_ms(interval);
     }
 
     if (is_shifted) {
         unregister_code(KC_LEFT_SHIFT);
+#if defined(LK_WIRELESS_ENABLE) || defined(KC_BLUETOOTH_ENABLE)
+        if (interval) send_string_task();
+#endif
         wait_ms(interval);
     }
 
     if (is_dead) {
         tap_code(KC_SPACE);
+#if defined(LK_WIRELESS_ENABLE) || defined(KC_BLUETOOTH_ENABLE)
+        if (interval) send_string_task();
+#endif
         wait_ms(interval);
     }
 }

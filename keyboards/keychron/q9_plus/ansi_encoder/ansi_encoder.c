@@ -7,11 +7,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "quantum.h"
@@ -21,24 +21,23 @@ const snled27351_led_t PROGMEM g_snled27351_leds[SNLED27351_LED_COUNT] = {
 /* Refer to SNLED27351 manual for these locations
  *   driver
  *   |  R location
- *   |  |       G location
- *   |  |       |       B location
- *   |  |       |       | */
-    {0, CB12_CA16,   CB10_CA16,   CB11_CA16},
-    {0, CB12_CA15,   CB10_CA15,   CB11_CA15},
-    {0, CB12_CA14,   CB10_CA14,   CB11_CA14},
-    {0, CB12_CA13,   CB10_CA13,   CB11_CA13},
-    {0, CB12_CA12,   CB10_CA12,   CB11_CA12},
-    {0, CB12_CA11,   CB10_CA11,   CB11_CA11},
-    {0, CB12_CA10,   CB10_CA10,   CB11_CA10},
-    {0, CB12_CA9,    CB10_CA9,    CB11_CA9},
-    {0, CB12_CA8,    CB10_CA8,    CB11_CA8},
-    {0, CB12_CA7,    CB10_CA7,    CB11_CA7},
-    {0, CB12_CA6,    CB10_CA6,    CB11_CA6},
-    {0, CB12_CA5,    CB10_CA5,    CB11_CA5},
-    {0, CB12_CA4,    CB10_CA4,    CB11_CA4},
-    {0, CB12_CA3,    CB10_CA3,    CB11_CA3},
-    // {0, CB12_CA2,    CB10_CA2,    CB11_CA2},
+ *   |  |           G location
+ *   |  |           |           B location
+ *   |  |           |           | */
+    {0, CB12_CA16,  CB10_CA16,  CB11_CA16},
+    {0, CB12_CA15,  CB10_CA15,  CB11_CA15},
+    {0, CB12_CA14,  CB10_CA14,  CB11_CA14},
+    {0, CB12_CA13,  CB10_CA13,  CB11_CA13},
+    {0, CB12_CA12,  CB10_CA12,  CB11_CA12},
+    {0, CB12_CA11,  CB10_CA11,  CB11_CA11},
+    {0, CB12_CA10,  CB10_CA10,  CB11_CA10},
+    {0, CB12_CA9,   CB10_CA9,   CB11_CA9},
+    {0, CB12_CA8,   CB10_CA8,   CB11_CA8},
+    {0, CB12_CA7,   CB10_CA7,   CB11_CA7},
+    {0, CB12_CA6,   CB10_CA6,   CB11_CA6},
+    {0, CB12_CA5,   CB10_CA5,   CB11_CA5},
+    {0, CB12_CA4,   CB10_CA4,   CB11_CA4},
+    {0, CB12_CA3,   CB10_CA3,   CB11_CA3},
 
     {0, CB3_CA16,   CB1_CA16,   CB2_CA16},
     {0, CB3_CA15,   CB1_CA15,   CB2_CA15},

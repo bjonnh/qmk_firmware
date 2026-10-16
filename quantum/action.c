@@ -31,6 +31,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "keycode_config.h"
 #include "debug.h"
 #include "quantum.h"
+#if defined(LK_WIRELESS_ENABLE) || defined(KC_BLUETOOTH_ENABLE)
+#    include "wireless.h"
+#endif
 
 #ifdef BACKLIGHT_ENABLE
 #    include "backlight.h"
@@ -976,7 +979,7 @@ __attribute__((weak)) void register_code(uint8_t code) {
 #ifdef EXTRAKEY_ENABLE
     } else if (IS_SYSTEM_KEYCODE(code)) {
         host_system_send(KEYCODE2SYSTEM(code));
-    } else if (IS_CONSUMER_KEYCODE(code)) {
+    } else if (IS_CONSUMER_KEYCODE(code) || IS_CONSUMER_RESERVED_KEYCODE(code)) {
         host_consumer_send(KEYCODE2CONSUMER(code));
 #endif
 
@@ -1033,7 +1036,7 @@ __attribute__((weak)) void unregister_code(uint8_t code) {
 #ifdef EXTRAKEY_ENABLE
     } else if (IS_SYSTEM_KEYCODE(code)) {
         host_system_send(0);
-    } else if (IS_CONSUMER_KEYCODE(code)) {
+    } else if (IS_CONSUMER_KEYCODE(code) || IS_CONSUMER_RESERVED_KEYCODE(code)) {
         host_consumer_send(0);
 #endif
 
@@ -1049,8 +1052,15 @@ __attribute__((weak)) void unregister_code(uint8_t code) {
  */
 __attribute__((weak)) void tap_code_delay(uint8_t code, uint16_t delay) {
     register_code(code);
+#if defined(LK_WIRELESS_ENABLE) || defined(KC_BLUETOOTH_ENABLE)
+    send_string_task();
+#endif
     wait_ms(delay);
     unregister_code(code);
+#if defined(LK_WIRELESS_ENABLE) || defined(KC_BLUETOOTH_ENABLE)
+    send_string_task();
+#endif
+
 }
 
 /** \brief Tap a keycode with the default delay.

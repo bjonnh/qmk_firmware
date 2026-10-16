@@ -54,17 +54,19 @@ static uint16_t heatmap_decrease_timer;
 static bool decrease_heatmap_values;
 
 bool TYPING_HEATMAP(effect_params_t* params) {
+    static uint8_t last_iter = 0;
+
     RGB_MATRIX_USE_LIMITS(led_min, led_max);
 
     if (params->init) {
-        rgb_matrix_set_color_all(0, 0, 0);
+        rgb_matrix_region_set_color_all(params->region, 0, 0, 0);
         memset(g_rgb_frame_buffer, 0, sizeof g_rgb_frame_buffer);
     }
 
     // The heatmap animation might run in several iterations depending on
     // `RGB_MATRIX_LED_PROCESS_LIMIT`, therefore we only want to update the
     // timer when the animation starts.
-    if (params->iter == 0) {
+    if (params->iter == 0 && last_iter != params->iter) {
         decrease_heatmap_values = timer_elapsed(heatmap_decrease_timer) >= RGB_MATRIX_TYPING_HEATMAP_DECREASE_DELAY_MS;
 
         // Restart the timer if we are going to decrease the heatmap this frame.
@@ -95,16 +97,17 @@ bool TYPING_HEATMAP(effect_params_t* params) {
                     hsv_t hsv = {170 - qsub8(val, 85), rgb_matrix_config.hsv.s, scale8((qadd8(170, val) - 170) * 3, rgb_matrix_config.hsv.v)};
                     rgb_t rgb = rgb_matrix_hsv_to_rgb(hsv);
 
-                    rgb_matrix_set_color(led_index, rgb.r, rgb.g, rgb.b);
+                    rgb_matrix_region_set_color(params->region, led_index, rgb.r, rgb.g, rgb.b);
                     processed = true;
                 }
             }
 
-            if (processed && decrease_heatmap_values) {
+            if (processed && decrease_heatmap_values && last_iter != params->iter) {
                 g_rgb_frame_buffer[row][col] = qsub8(val, 1);
             }
         }
     }
+    last_iter = params->iter;
 
     return rgb_matrix_check_finished_leds(led_max);
 }

@@ -130,6 +130,43 @@ const rgb_matrix_driver_t rgb_matrix_driver = {
     .flush         = snled27351_flush,
     .set_color     = snled27351_set_color,
     .set_color_all = snled27351_set_color_all,
+#        if defined(RGB_MATRIX_DRIVER_SHUTDOWN_ENABLE)
+    .shutdown = snled27351_shutdown,
+    .exit_shutdown = snled27351_exit_shutdown,
+#        endif
+#ifdef RGB_MATRIX_DRIVER_GET_TOTAL_DUTY_RATIO_ENABLE
+    .get_total_duty_ratio = snled27351_get_total_duty_ratio
+#endif
+};
+
+#elif defined(RGB_MATRIX_SNLED27351_SPI)
+const rgb_matrix_driver_t rgb_matrix_driver = {
+    .init = snled27351_init_drivers,
+    .flush = snled27351_flush,
+    .set_color = snled27351_set_color,
+    .set_color_all = snled27351_set_color_all,
+#        if defined(RGB_MATRIX_DRIVER_SHUTDOWN_ENABLE)
+    .shutdown = snled27351_shutdown,
+    .exit_shutdown = snled27351_exit_shutdown,
+#        endif
+#ifdef RGB_MATRIX_DRIVER_GET_TOTAL_DUTY_RATIO_ENABLE
+    .get_total_duty_ratio = snled27351_get_total_duty_ratio
+#endif
+};
+
+#elif defined(RGB_MATRIX_SN3734_SPI)
+const rgb_matrix_driver_t rgb_matrix_driver = {
+    .init = sn3734_init_drivers,
+    .flush = sn3734_flush,
+    .set_color = sn3734_set_color,
+    .set_color_all = sn3734_set_color_all,
+#        if defined(RGB_MATRIX_DRIVER_SHUTDOWN_ENABLE)
+    .shutdown = sn3734_shutdown,
+    .exit_shutdown = sn3734_exit_shutdown,
+#        endif
+#ifdef RGB_MATRIX_DRIVER_GET_TOTAL_DUTY_RATIO_ENABLE
+    .get_total_duty_ratio = sn3734_get_total_duty_ratio
+#endif
 };
 
 #elif defined(RGB_MATRIX_AW20216S)
