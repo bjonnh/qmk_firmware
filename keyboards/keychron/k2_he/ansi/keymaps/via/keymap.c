@@ -16,6 +16,9 @@
 
 #include QMK_KEYBOARD_H
 #include "keychron_common.h"
+#ifdef KEY_SIGNALS_ENABLE
+#    include "key_signals.h"
+#endif
 
 enum layers {
     MAC_BASE,
@@ -65,3 +68,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,            _______,  _______,  _______,  _______,  BAT_LVL,  _______,  _______,  _______,  _______,  _______,            _______,  _______,  _______,
         _______,  _______,  _______,                                _______,                                _______,  _______,  _______,  _______,  _______,  _______)
 };
+
+#ifdef KEY_SIGNALS_ENABLE
+bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
+    key_signals_render(led_min, led_max);
+    return true;
+}
+#endif
